@@ -14,9 +14,7 @@ from tkFileDialog import askdirectory
 import sys
 import os
 sp = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'spectra'))
-sp2 = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(sp)
-sys.path.append(sp2)
 import spectra as sp
 import all_functions as af
 
