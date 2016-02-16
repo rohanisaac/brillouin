@@ -9,6 +9,8 @@ import matplotlib
 matplotlib.use('TkAgg')  # otherwise tk stuff crashes
 import matplotlib.pyplot as plt
 # import seaborn as sns
+from Tkinter import Tk
+from tkFileDialog import askdirectory
 import sys
 import os
 sp = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'spectra'))
@@ -33,9 +35,6 @@ def plotfit(obj, ndir, fname):
 
 # Gui section
 # note need to use Tk as matplotlib backend or crashes
-from Tkinter import Tk
-from tkFileDialog import askdirectory
-
 
 Tk().withdraw()  # don't need full GUI, keep the root window from appearing
 # folname = os.path.abspath(os.path.join(os.path.dirname(__file__), 'data'))
