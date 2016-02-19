@@ -1,4 +1,4 @@
-#!/usr/bin/env
+#!/usr/bin/env python
 # Brillouin peak fitting script
 # -----------------------------
 # author: Rohan Isaac
