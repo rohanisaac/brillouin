@@ -1,3 +1,4 @@
+#!/usr/bin/env
 # Brillouin peak fitting script
 # -----------------------------
 # author: Rohan Isaac
@@ -20,6 +21,7 @@ import all_functions as af
 
 # Set spacing
 spacing = 0.54  # cm
+crossed = True  # if peaks are crossed
 
 def plotfit(obj, ndir, fname):
     fig = plt.figure()
@@ -104,13 +106,22 @@ for f in os.listdir(folname):
 
     # note all br fits have 4 peaks, only 2 center are relevant
     # differences between laser and brillouin peaks
-    # (l_0) b1_1 b1_2 (l_1) b2_1 b2_2 (l_2)
-    sh = [
-          oc(br1, 2) - oc(las, 0),
-          oc(las, 1) - oc(br1, 1),
-          oc(br2, 2) - oc(las, 1),
-          oc(las, 2) - oc(br2, 1)
-    ]
+    if crossed:
+        # (l_0) b1_1 b1_2 (l_1) b2_1 b2_2 (l_2)
+        sh = [
+              oc(br1, 2) - oc(las, 0),
+              oc(las, 1) - oc(br1, 1),
+              oc(br2, 2) - oc(las, 1),
+              oc(las, 2) - oc(br2, 1)
+        ]
+    else:
+        # (l_0) b1_1 b1_2 (l_1) b2_1 b2_2 (l_2)
+        sh = [
+              oc(br1, 1) - oc(las, 0),
+              oc(las, 1) - oc(br1, 2),
+              oc(br2, 1) - oc(las, 1),
+              oc(las, 2) - oc(br2, 2)
+        ]
 
     fsr = 1.0 / (2.0 * spacing)
     freqsh = [(fsr / 256.0) * (s) for s in sh]
