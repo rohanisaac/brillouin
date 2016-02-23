@@ -4,7 +4,7 @@
 # author: Rohan Isaac
 #
 # Splits data, fits elastic and inelastic peaks separately, all with Lorentzian
-from argparse
+import argparse
 import os
 import sys
 import numpy as np
