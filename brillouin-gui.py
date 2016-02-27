@@ -16,6 +16,9 @@ sys.path.append(sp)
 import spectra as sp
 import all_functions as af
 
+# for pyinstaller
+nonbuffered_stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+sys.stdout = nonbuffered_stdout
 
 def plotfit(obj, ndir, fname):
     fig = plt.figure()
