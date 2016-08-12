@@ -92,6 +92,20 @@ for f in os.listdir(folname):
         br1 = b1.output_results(pandas=True)  # should be sorted?
         br2 = b2.output_results(pandas=True)
 
+        # plot single plot with the data and fits
+        plt.clf()
+        fig, ax = plt.subplots(figsize=(12,4))
+        plt.step(b1x,b1y,'b')
+        plt.step(b2x,b2y,'b', label='data')
+        plt.plot(b1x,b1.out.best_fit,'r', lw=2)
+        plt.plot(b2x,b2.out.best_fit,'r', lw=2, label='fit')
+        plt.xlim(0,256)
+        plt.ylim(0,96)
+        plt.legend()
+        plt.xticks(np.arange(0,257,32))
+        plt.yticks(np.arange(0,127,32))
+        plt.savefig(os.path.join(sub_path, base_name + '.pdf'))
+
         # note all br fits have 4 peaks, only 2 center are relevant
         # differences between laser and brillouin peaks
         if crossed:
