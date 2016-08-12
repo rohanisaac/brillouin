@@ -7,15 +7,15 @@
 
 import numpy as np
 import matplotlib
-matplotlib.use('TkAgg')  # otherwise tk stuff crashes
+# matplotlib.use('TkAgg')  # otherwise tk stuff crashes
 import matplotlib.pyplot as plt
 # import seaborn as sns
-from Tkinter import Tk
-from tkFileDialog import askdirectory
+# from Tkinter import Tk
+# from tkFileDialog import askdirectory
 import sys
 import os
-sp = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'spectra'))
-sys.path.append(sp)
+#sp = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'spectra'))
+#sys.path.append(sp)
 import spectra as sp
 import all_functions as af
 
@@ -36,9 +36,9 @@ def plotfit(obj, ndir, fname):
 # Gui section
 # note need to use Tk as matplotlib backend or crashes
 
-Tk().withdraw()  # don't need full GUI, keep the root window from appearing
-# folname = os.path.abspath(os.path.join(os.path.dirname(__file__), 'data'))
-folname = askdirectory(title='Please select dir')
+# Tk().withdraw()  # don't need full GUI, keep the root window from appearing
+folname = os.path.abspath('sample_data')
+# folname = askdirectory(title='Please select dir')
 
 # redirect output to log file
 # sys.stdout = open(folname + '/output.txt', 'w')
@@ -80,7 +80,8 @@ for f in os.listdir(folname):
 
     # inelastic range 1
     b1 = sp.Spectra(b1x, b1y)
-    b1.find_peaks(width=5, threshold=20, limit=4)
+    b1.smooth_data(window_size=5, order=3)
+    b1.find_peaks(width=5, threshold=0, limit=4, smooth=True)
     b1.build_model(bg_ord=0)
     b1.fit_data()
     b1.output_results()
@@ -89,7 +90,8 @@ for f in os.listdir(folname):
 
     # inelastic range 2
     b2 = sp.Spectra(b2x, b2y)
-    b2.find_peaks(width=5, threshold=20, limit=4)
+    b2.smooth_data(window_size=5, order=3)
+    b2.find_peaks(width=5, threshold=0, limit=4, smooth=True)
     b2.build_model(bg_ord=0)
     b2.fit_data()
     b2.output_results()
@@ -129,6 +131,7 @@ for f in os.listdir(folname):
     wfil.write(f + ',')  # filename
     wfil.write(",".join(freqs))  # frequencies
     wfil.write('\n')
+
     # print freqsh
     l.output_results()
     b1.output_results()
