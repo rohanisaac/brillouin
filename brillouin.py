@@ -1,3 +1,9 @@
+"""
+description: functions to automate peak fitting, plotting and outputting fit
+values to brillouin data
+author: Rohan Isaac
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import spectra as sp

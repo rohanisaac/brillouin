@@ -19,3 +19,4 @@ Todo
 1. Make a test case and run on Travis-CI
 2. Option for alternative peak shape
 3. Make a GUI
+4. Pickle fit objects
