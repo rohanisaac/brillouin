@@ -26,8 +26,8 @@ def process_folder(fol, spacing, crossed):
             fname = os.path.join(folname, f)
 
             a, b, c = fit_file(fname)
-            plot_fit(a, b, c, fname[:-3]+'pdf')
-            f1, f2, f3, f4, favg = calculate_shifts(a, b, c, d=spacing, crossed=crossed)
+            plot_fit(a, b, c, fname[:-3]+'pdf', filename=f, spacing=spacing, crossed=crossed)
+            f1, f2, f3, f4, favg = calculate_shifts(a, b, c, spacing=spacing, crossed=crossed)
             out_file.write("{},{},{},{},{},{},{},{},{},{},{}\n".format(f, f1.n, f1.s , f2.n, f2.s, f3.n, f3.s, f4.n, f4.s, favg.n, favg.s))
     out_file.write("\nFolder{}\nSpacing:{} cm\nCrossed:{}\n".format(fol, spacing, crossed))
     out_file.close()

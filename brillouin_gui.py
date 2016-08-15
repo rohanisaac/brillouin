@@ -10,15 +10,15 @@ import ttk
 from brillouin_folder import process_folder
 
 def process(*args):
-    try:
-        output.set('Processing folder...')
-        folder_value = str(folder.get())
-        spacing_value = float(spacing.get())
-        crossed_value = bool(crossed.get())
-        process_folder(folder_value, spacing_value, crossed_value)
-        output.set('Done.')
-    except:
-        output.set('Error! Check paramters and try again')
+    # try:
+    output.set('Processing folder...')
+    folder_value = str(folder.get())
+    spacing_value = float(spacing.get())
+    crossed_value = bool(crossed.get())
+    process_folder(folder_value, spacing_value, crossed_value)
+    output.set('Done.')
+    #except:
+    #    output.set('Error! Check paramters and try again')
 
 def askdirectory(*args):
     folder.set(tkFileDialog.askdirectory())
