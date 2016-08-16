@@ -3,7 +3,7 @@ description: functions to automate peak fitting, plotting and outputting fit
 values to brillouin data
 author: Rohan Isaac
 """
-
+from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
@@ -202,4 +202,17 @@ def calculate_shifts(a, b, c, spacing=0.56, crossed=False):
         f3 = wn_ch * (p4 - l2)
         f4 = wn_ch * (l3 - p3)
 
-    return f1, f2, f3, f4, (f1 + f2 + f3 + f4) / 4
+    s_avg = (f1 + f2 + f3 + f4) / 4
+    shifts = [f1, f2, f3, f4, s_avg]
+
+    return shifts
+
+
+def peak_widths(a, b, c):
+    """
+    Return the peak width of fitten peaks
+    """
+    peaks = [(a, 0), (a, 1), (a, 2), (b, 1), (b, 2), (c, 1), (c, 2)]
+    # fwhm = 2.0 * sigma for lorentzian
+    fwhm = [2.0 * full_param(i, 'p%s_sigma' % j) for (i, j) in peaks]
+    return fwhm
