@@ -1,6 +1,6 @@
 """
-Spectra class
--------------
+Modified version of spectra class for brillouin analysis
+--------------------------------------------------------
 Analyze spectral data using combination of numpy, scipy, lmfit and
 some primitive algorithms
 
@@ -10,13 +10,10 @@ author: Rohan Isaac
 from __future__ import division
 import numpy as np
 from numpy import sqrt, pi
-import re
-import pandas as pd
 from scipy import signal
 from lmfit import Model
 from lmfit.models import PolynomialModel
 from lmfit.lineshapes import lorentzian, gaussian, voigt
-from uncertainties import ufloat
 
 
 class Spectra:
@@ -55,158 +52,21 @@ class Spectra:
         """
         # import data into spec object
         print "Loading file ... "
-        if len(args) == 1:
-            file_name = args[0]
-            print file_name
-            self.x, self.y = self.getxy(file_name)
-        elif len(args) == 2:
-            self.x, self.y = args
 
+        self.x, self.y = args
         self.num_points = len(self.y)
         # make a first guess of peak width
         # also updates max, and max position
+        
         self.guess_peak_width()
 
         # clone the y list so that any modifications can be reset
         self.y_bak = self.y[:]
         self.x_bak = self.x[:]
 
-    def getxy(self, file_name, headers=False):
-        """Extracts x and y data numpy arrays from passed filename.
-
-        Arguments
-        ---------
-        file_name: string
-            full/relative path to file to extract data from
-
-        Returns
-        -------
-        if headers == True:
-            x,y,xlab,ylab (np.array, np.array, str, str)
-
-        else:
-            x,y
-        where:
-            x,y: 1-d numpy arrays containing first and second column of data
-            present in file
-            xlab, ylab: header information about columns
-        """
-        line_pos = 0  # active line number
-        start_pos = 0
-        end_pos = 0
-        dat_read = False  # has data been read
-        header = ''
-
-        with open(file_name, 'rb') as fil:
-            # find header and footer positions
-            for lin in fil:
-                line_pos += 1
-                # if line contains any of the alphabet (except e for exponents,
-                # not data)
-                if re.search('[a-df-zA-DF-Z]', lin):
-                    if not dat_read:
-                        # before data has been read, set start of data pos
-                        start_pos = line_pos
-                        header = lin
-                    if dat_read and end_pos == 0:
-                        # after data had been read and before end position has
-                        # been set, set end pos
-                        end_pos = line_pos
-
-                # if data line and data has not been read
-                elif not dat_read:
-                    # find seperator
-                    if re.search('\t', lin):
-                        sep_char = '\t'
-                    elif re.search(',', lin):
-                        sep_char = ','
-                    else:
-                        print "Unknown separator character"
-                    # now we know what separator is for the data
-                    dat_read = True
-
-                # data line and we already know what the separator character is
-                else:
-                    continue
-
-        # if we didn't find an end position
-        if end_pos == 0:
-            skip_foot = 0
-        else:
-            # if we did compute it
-            skip_foot = line_pos - end_pos
-
-        xlab, ylab = ('', '')
-        # find header row if exists
-        header_lst = header.split(sep_char)
-        # print headerlst
-        if len(header_lst) >= 2:
-            xlab, ylab = header_lst[0:2]
-
-        # attempt to load into numpy array, see what happens
-        fdat = np.genfromtxt(
-            file_name, delimiter=sep_char, skip_header=start_pos,
-            skip_footer=skip_foot)
-
-        if headers:
-            return fdat[:, 0], fdat[:, 1], xlab, ylab
-        else:
-            return fdat[:, 0], fdat[:, 1]
-
     def smooth_data(self, window_size=25, order=2):
         """ Smooths data using savgol_filter """
         self.y_smooth = signal.savgol_filter(self.y, window_size, order)
-
-    def butter_lp_filter(self, cutoff=None, order=2):
-        """
-        Performs a low pass butterworth filter on the data with cutoff
-        frequency that defaults to 2/len(y)
-
-        Arguments
-        ---------
-        cutoff (float) [default: 2/len(y)]
-            cutoff frequency at which to filter the data
-        order (int) [default: 2]
-            filter order
-
-        Returns
-        -------
-        (array)
-            low pass filtered array same size as data
-        """
-        if cutoff is None:
-            cutoff = 2 / len(self.y)
-        B, A = signal.butter(order, cutoff, output='ba')
-        return signal.filtfilt(B, A, self.y)
-
-    def find_background(self, cutoff=None, order=2):
-        """ Attempts to find the background of the spectra using low
-        pass filter
-
-        Arguments
-        ---------
-        cutoff (float) [default: 2/len(y)]
-            cutoff frequency at which to filter the data
-        order (int) [default: 2]
-            filter order
-
-        Returns
-        -------
-        bg : array
-            background spectrum
-
-        """
-        print "Finding background ... "
-        if cutoff is None:
-            cutoff = 2 / len(self.y)
-        # use the low pass filter to find the background
-        self.bg = self.butter_lp_filter(cutoff, order)
-        return self.bg
-
-    def subtract_background(self):
-        """ Subtract background from active spectra """
-        print "Subtracting background ... "
-        self.y = self.y - self.bg
 
     def find_peaks(self, width=None, w_range=5, threshold=5, limit=20,
                    smooth=False):
@@ -372,78 +232,6 @@ class Spectra:
         self.out = out
         return self.out
 
-    def output_results(self, filename=None, pandas=False):
-        """ Return fit paramters and standard error, modified from lmfit
-        class. Can output same data to file if passed file path
-
-        Arguments
-        ---------
-        filename : string (default: None)
-            If filename is given write data to that file as csv
-
-        pandas : bool (default: False)
-            True: Return data as pandas dataframe
-            False: Return data as string (csv)
-        """
-
-        # notes -- need to make output model accurate
-
-        params = self.out.params
-        dat_out = ''
-        for name in list(params.keys()):
-            par = params[name]
-            dat_out += '%s\t%s\t%s\n' % (name, par.value, par.stderr)
-        # print dat_out
-        if filename:
-            with open(filename, 'w') as f:
-                f.write(dat_out)
-        if pandas:
-            from io import StringIO
-            all_data = pd.read_csv(StringIO(unicode(dat_out)),
-                                   delimiter='\t',
-                                   header=None,
-                                   index_col=0,
-                                   names=['value', 'stderr'])
-            return all_data
-        else:
-            return dat_out
-
-    # ---
-    # Helper functions
-    # ---
-    def print_peak_results(self):
-        """
-        Compute all peak results including additional outputs such as Height
-        and FWHM
-        """
-        params = self.out.params
-        print '\tPosition\tHeight\tFWHM'
-        for p in range(self.num_peaks):
-            center = ufloat(params['p%s_center' % p].value, params['p%s_center' % p].stderr)
-            amplitude = ufloat(params['p%s_amplitude' % p].value, params['p%s_amplitude' % p].stderr)
-            sigma = ufloat(params['p%s_sigma' % p].value, params['p%s_sigma' % p].stderr)
-            height = self.height(amplitude, sigma)
-            fwhm = self.fwhm(sigma)
-            print 'Peak%s\t%s\t%s\t%s' % (p, center, height, fwhm)
-
-    def crop(self, xmin, xmax):
-        """
-        Crops data using x values
-
-        Args:
-            xmin: min x value
-            ymax: max y value
-        """
-        r1 = np.argmin(abs(self.x - xmin))
-        r2 = np.argmin(abs(self.x - xmax))
-        # print r1,r2
-        if r1 < r2:
-            self.x, self.y = self.x[r1:r2], self.y[r1:r2]
-        elif r1 > r2:
-            self.x, self.y = self.x[r2:r1], self.y[r2:r1]
-        else:
-            print "Error, no subrange"
-
     def guess_peak_width(self, max_width=None):
         """ Find an initial guess for the peak with of the data imported,
         use in peak finding and model buildings and other major functions,
@@ -518,30 +306,6 @@ class Spectra:
         fwhm = self.x[right] - self.x[left]
 
         return fwhm
-
-    def filter_high_freq(self, cof=5):
-        """ Filter high frequency y-data using 1-D fft
-
-        Parameters
-        ----------
-        cof : int (default=5)
-            Coefficient above which to truncate Fourier series.
-
-        """
-        pass
-
-    def calibrate_x(self, m, b):
-        """ Applies a linear correction to the x-values """
-        # Need to change the active data set
-        # Save the old data etc.
-
-        pass
-
-    def reset(self):
-        """
-        Reset the y data to the original value
-        """
-        self.y = self.y_bak
 
     def height(self, amplitude, sigma):
         """
