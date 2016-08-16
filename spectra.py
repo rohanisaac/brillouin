@@ -57,7 +57,6 @@ class Spectra:
         self.num_points = len(self.y)
         # make a first guess of peak width
         # also updates max, and max position
-        
         self.guess_peak_width()
 
         # clone the y list so that any modifications can be reset
@@ -339,4 +338,3 @@ class Spectra:
         voigt: 3.60131
         """
         return self.wfactor * sigma
- 
