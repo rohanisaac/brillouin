@@ -96,6 +96,13 @@ def plot_fit(l, b1, b2, save_path, filename, spacing=0.56, crossed=False):
     plt.plot(b1.x, b1.out.best_fit, 'r', lw=2)
     plt.plot(b2.x, b2.out.best_fit, 'r', lw=2)
 
+    # also save the data in a file
+    b1_fit = np.vstack((b1.x, b1.out.best_fit))
+    b2_fit = np.vstack((b2.x, b2.out.best_fit))
+    b_fit = np.concatenate((b1_fit, b2_fit), axis=1)
+
+    np.savetxt(save_path[:-4]+'_fit.csv', b_fit.T, delimiter=',')
+
     # brillouin peaks
     for i in [p1, p2, p3, p4]:
         plt.axvline(i, color='gray', ls='--', lw=1, alpha=0.5)
